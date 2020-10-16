@@ -21,8 +21,8 @@
   },
   "scripts": {
     "start": "npm run prod",
-    "server": "babel-node ./src/bin/www",
-    "server:prod": "node ./dist/bin/www",
+    "server": "babel-node ./src/server",
+    "server:prod": "node ./dist/server",
     "dev": "set NODE_ENV=development npm-run-all server",
     "clean": "rimraf dist",
     "build": "babel ./src --out-dir dist",
