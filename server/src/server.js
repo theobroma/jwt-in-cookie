@@ -13,21 +13,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-const jwtSecret = 'secret123';
-
-// app.get('/jwt', (req, res) => {
-//   res.json({
-//     token: jsonwebtoken.sign({ user: 'johndoe' }, jwtSecret),
-//   });
-// });
-
 app.get('/jwt', (req, res) => {
   const token = jsonwebtoken.sign({ user: 'johndoe' }, jwtSecret);
   res.cookie('token', token, { httpOnly: true });
   res.json({ token });
 });
 
-app.use(jwt({ secret: jwtSecret, algorithms: ['HS256'] }));
+//  order matters !!!
+const jwtSecret = 'secret123';
+app.use(
+  jwt({
+    secret: jwtSecret,
+    algorithms: ['HS256'],
+    getToken: (req) => req.cookies.token,
+  }),
+);
 
 const foods = [
   { id: 1, description: 'burritos' },
