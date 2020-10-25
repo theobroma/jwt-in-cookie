@@ -4,6 +4,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const csrf = require('csurf');
 
 const app = express();
 
@@ -12,6 +13,15 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// CSRF
+const csrfProtection = csrf({
+  cookie: true,
+});
+app.use(csrfProtection);
+app.get('/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
 
 app.get('/jwt', (req, res) => {
   const token = jsonwebtoken.sign({ user: 'johndoe' }, jwtSecret);
@@ -37,6 +47,16 @@ const foods = [
 
 app.get('/foods', (req, res) => {
   res.json(foods);
+});
+
+app.post('/foods', (req, res) => {
+  foods.push({
+    id: foods.length + 1,
+    description: 'new food',
+  });
+  res.json({
+    message: 'Food created!',
+  });
 });
 
 app.listen(3001);

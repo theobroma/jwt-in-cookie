@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import shortid from "shortid";
 import "./App.css";
@@ -24,6 +24,15 @@ function App() {
   const [jwt, setJwt] = useState(storedJwt || null);
   const [foods, setFoods] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const [newFoodMessage, setNewFoodMessage] = useState(null);
+
+  useEffect(() => {
+    const getCsrfToken = async () => {
+      const { data } = await axios.get("/csrf-token");
+      axios.defaults.headers.post["X-CSRF-Token"] = data.csrfToken;
+    };
+    getCsrfToken();
+  }, []);
 
   // const getJwt = async () => {
   //   const { data } = await axios.get(`${apiUrl}/jwt`);
@@ -46,8 +55,19 @@ function App() {
     }
   };
 
+  const createFood = async () => {
+    try {
+      const { data } = await axios.post("/foods");
+      setNewFoodMessage(data.message);
+      setFetchError(null);
+    } catch (err) {
+      setFetchError(err.message);
+    }
+  };
+
   return (
     <>
+      {/* JWT */}
       <section style={{ marginBottom: "10px" }}>
         <button onClick={() => getJwt()}>Get JWT</button>
         {jwt && (
@@ -56,6 +76,7 @@ function App() {
           </pre>
         )}
       </section>
+      {/* Foodlist */}
       <section>
         <button onClick={() => getFoods()}>Get Foods</button>
         <ul>
@@ -64,6 +85,11 @@ function App() {
           ))}
         </ul>
         {fetchError && <p style={{ color: "red" }}>{fetchError}</p>}
+      </section>
+      {/* csrf test */}
+      <section>
+        <button onClick={() => createFood()}>Create New Food</button>
+        {newFoodMessage && <p>{newFoodMessage}</p>}
       </section>
     </>
   );
